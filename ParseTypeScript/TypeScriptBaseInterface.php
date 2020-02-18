@@ -30,9 +30,24 @@ class TypeScriptBaseInterface
 
     public function __toString()
     {
-        $result = "export interface {$this->name} {\n";
-        $result .= implode(",\n", array_map(function($item) { return '  ' . (string)$item;}, $this->properties));
+
+        $imports = [];
+        $pieces = [];
+        foreach ($this->properties as $property) {
+            if (in_array($property->type, ['number', 'string', 'boolean']) === false) {
+                $rel = str_replace('[]', '', $property->type);
+                $imports[] = 'import { ' . $rel . ' } from "./' . $rel . '";';
+            }
+
+            $pieces[] = "  " . $property->name . ": " . $property->type . ";";
+        }
+
+        $result = "";
+        $result .= implode("\n", $imports);
+        $result .= "\nexport interface {$this->name} {\n";
+        $result .= implode("\n", $pieces);
         $result .= "\n}\n";
+
         return $result;
     }
 
