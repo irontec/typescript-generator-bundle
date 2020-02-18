@@ -6,8 +6,7 @@
 namespace Irontec\TypeScriptGeneratorBundle\Command;
 
 use \Symfony\Component\Console\Command\Command;
-use \Symfony\Component\Console\Input\InputArgument;
-use \Symfony\Component\Console\Input\InputInterface;
+use \Symfony\Component\Console\Input\{InputArgument, InputInterface};
 use \Symfony\Component\Console\Output\OutputInterface;
 use \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use \Symfony\Component\Filesystem\Filesystem;
@@ -23,7 +22,7 @@ use \Irontec\TypeScriptGeneratorBundle\ParseTypeScript\Parser as ParseTypeScript
 class GenerateInterfaceCommand extends Command
 {
 
-    protected static $defaultName = 'typescript:generate:interface';
+    protected static $defaultName = 'typescript:generate:interfaces';
 
     /**
      * @var ParameterBagInterface
@@ -40,15 +39,10 @@ class GenerateInterfaceCommand extends Command
     {
 
         $this->setDescription('Generate TypeScript interfaces from Doctrine Entities');
+        $this->setHelp('bin/console typescript:generate:interfaces interfaces src/Entity');
 
         $this->addArgument('output', InputArgument::REQUIRED, 'Where to generate the interfaces?');
-
-        $this->addArgument(
-            'entities-dir',
-            InputArgument::OPTIONAL,
-            'Where are the entities?',
-            $this->params->get('kernel.project_dir') . '/src/Entity/'
-        );
+        $this->addArgument('entities-dir', InputArgument::OPTIONAL, 'Where are the entities?', $this->params->get('kernel.project_dir') . '/src/Entity/');
 
     }
 
@@ -62,8 +56,9 @@ class GenerateInterfaceCommand extends Command
         $finder = new Finder();
         $finder->files('*.php')->in($dirEntity);
 
-        foreach ($finder as $file) {
+        $models = array();
 
+        foreach ($finder as $file) {
             $parser = new ParseTypeScript($file->getPathName());
 
             $parserOutput = $parser->getOutput();
@@ -71,9 +66,21 @@ class GenerateInterfaceCommand extends Command
 
                 $targetFile = $dirOutput . '/' . str_replace( '.php','.ts', $file->getFilename());
                 $fs->dumpFile($targetFile, $parserOutput);
-                $output->writeln('created interface ' . $targetFile);
+                $output->writeln('Created interface ' . $targetFile);
+                $models[] = $parser->getCurrentInterface()->name;
 
             }
+        }
+
+        if (empty($models) === false) {
+            $tmp = '';
+            foreach ($models as $model) {
+                $tmp .= "export * from './" . $model . "';" . PHP_EOL;
+            }
+
+            $targetFile = $dirOutput . '/models.d.ts';
+            $fs->dumpFile($targetFile, $tmp . PHP_EOL);
+            $output->writeln('Created ' . $targetFile);
         }
 
         return 0;

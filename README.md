@@ -10,6 +10,12 @@ composer require irontec/typescript-generator-bundle
 
 > PHP *>=7.4*
 
+# Commands
+
+[Generate Interface](#generate-interface)
+[Generate Package](#generate-package)
+[Generate All](#generate-all)
+
 ## Generate Interface
 
 Este funcionalidad consiste, en crear interfaces de TypeScript basandose clases PHP pensadas en funcionar como entidades de doctrine.
@@ -124,7 +130,7 @@ class User
 
 Interface de TypeScript generada
 
-````javascript
+````typescript
 // interfaces/User.ts
 
 export interface User {
@@ -135,4 +141,67 @@ export interface User {
   photo: Photo,
   factories: Factory[]
 }
+````
+
+Para facilitar el uso de las interfaces, se general el fichero "**models.d.ts**" en el que se hace el export de todas las interfaces.
+
+````typescript
+// interfaces/models.d.ts
+
+export * from './User';
+export * from './Photo';
+export * from './Factory';
+````
+
+## Generate Package
+
+````bash
+bin/console typescript:generate:package output-dir [package-name] [version]
+````
+
+Con este comando se genera un fichero **package.json** con los datos básicos para publicar en un reposiorio privado de npm.
+
+Cada vez que se ejecute el generador de package, por defecto se actualiza la versión "**Patch**" de este, con la opción de pasar una versión en concreto o subir de "patch", "minor" o "major".
+
+Ejemplo del **package.json** que se genera:
+
+````json
+// interfaces/package.json
+{
+    "name": "@irontec/example",
+    "version": "0.0.1",
+    "description": "typescript interfaces for @irontec/example project",
+    "types": "models.d.ts",
+    "keywords": [],
+    "author": "",
+    "license": "EUPL"
+}
+````
+
+> [Librería con la que se gestionan las versiones](https://github.com/PHLAK/SemVer)
+
+## Generate All
+
+````bash
+bin/console typescript:generate:all output-dir [entities-dir] [package-name] [version]
+````
+
+Ejecuta los comandos anteriores.
+
+
+### Publicar en un repositorio privado de NPM
+
+Para publicar en un repositorio privado, es necesario generar previamente el fichero **package.json** y [tener instalado npm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+
+1) Iniciar sesión en NPM
+
+````bash
+npm adduser --registry https://npm.example.com
+````
+
+2) Publicar/Actualizar los cambios en las interfaces
+
+````bash
+npm publish --registry https://npm.example.com
 ````

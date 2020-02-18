@@ -1,13 +1,24 @@
 <?xml version="1.0" ?>
 <container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
-        <parameter key="irontec.type_script_generator.class">Irontec\TypeScriptGeneratorBundle\Command\GenerateInterfaceCommand</parameter>
+        <parameter key="irontec.type_script_generator_all.class">Irontec\TypeScriptGeneratorBundle\Command\GenerateAllCommand</parameter>
+        <parameter key="irontec.type_script_generator_interface.class">Irontec\TypeScriptGeneratorBundle\Command\GenerateInterfaceCommand</parameter>
+        <parameter key="irontec.type_script_generator_package.class">Irontec\TypeScriptGeneratorBundle\Command\GeneratePackageCommand</parameter>
     </parameters>
 
     <services>
-        <service id="irontec.type_script_generator" class="%irontec.type_script_generator.class%">
+        <service id="irontec.type_script_generator_all" class="%irontec.type_script_generator_all.class%">
             <argument type="service" id="parameter_bag" />
+            <tag name="console.command" />
+        </service>
 
+        <service id="irontec.type_script_generator_interface" class="%irontec.type_script_generator_interface.class%">
+            <argument type="service" id="parameter_bag" />
+            <tag name="console.command" />
+        </service>
+
+        <service id="irontec.type_script_generator_package" class="%irontec.type_script_generator_package.class%">
+            <argument type="service" id="parameter_bag" />
             <tag name="console.command" />
         </service>
     </services>

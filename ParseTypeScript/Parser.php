@@ -82,6 +82,16 @@ class Parser
     }
 
     /**
+     * Obtiene la interface que se esta usando actualmente
+     *
+     * @return TypeScriptBaseInterface
+     */
+    public function getCurrentInterface()
+    {
+        return $this->currentInterface;
+    }
+
+    /**
      * Obtiene el tipo de la variable en Typescript, segun el tipo de la propiedad
      *
      * @param \ReflectionProperty $property
