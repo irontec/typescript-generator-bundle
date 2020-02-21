@@ -64,7 +64,7 @@ class GenerateInterfaceCommand extends Command
             $parserOutput = $parser->getOutput();
             if (empty($parserOutput) === false) {
 
-                $targetFile = $dirOutput . '/' . str_replace( '.php','.ts', $file->getFilename());
+                $targetFile = $dirOutput . '/' . str_replace( '.php','.d.ts', $file->getFilename());
                 $fs->dumpFile($targetFile, $parserOutput);
                 $output->writeln('Created interface ' . $targetFile);
                 $models[] = $parser->getCurrentInterface()->name;
