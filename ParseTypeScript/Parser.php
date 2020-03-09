@@ -151,7 +151,7 @@ class Parser
         if ($result === 'unknown') {
             if (preg_match('/type="([a-zA-Z]+)"/i', $docComment, $matches)) {
                 $result = $this->getTypescriptProperty($matches[1]);
-            } elseif (preg_match('/targetEntity="([a-zA-Z]+)"/i', $docComment, $matches)) {
+            } elseif (preg_match('/targetEntity="([a-zA-Z-\\\\]+)"/i', $docComment, $matches)) {
                 $result = $this->getRelationCollectionProperty($docComment);
             }
         }
@@ -223,13 +223,14 @@ class Parser
         $matches = [];
 
         $regex = array(
-            '/OneToOne\(targetEntity="([a-zA-Z]+)"/i' => '',
+            '/targetEntity="([a-zA-Z]+)"/i' => '',
+            '/targetEntity="([a-zA-Z]+)\\\\([a-zA-Z]+)\\\\([a-zA-Z]+)"/i' => '',
             '/targetEntity="([a-zA-Z]+)"/i' => '[]',
         );
 
         foreach ($regex as $reg => $val) {
             if (preg_match($reg, $type, $matches)) {
-                $result = $matches[1] . $val;
+                $result = end($matches) . $val;
                 break;
             }
         }
