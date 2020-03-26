@@ -177,7 +177,7 @@ class Parser
             $result = 'number';
         } elseif (in_array($type, ['string', 'text', 'guid', 'date', 'time', 'datetime', 'datetimetz'])) {
             $result = 'string';
-        } elseif ($type === 'boolean') {
+        } elseif (in_array($type, ['boolean', 'bool'])) {
             $result = 'boolean';
         }
 
