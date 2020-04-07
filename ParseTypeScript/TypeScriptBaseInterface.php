@@ -34,7 +34,7 @@ class TypeScriptBaseInterface
         $imports = [];
         $pieces = [];
         foreach ($this->properties as $property) {
-            if (in_array($property->type, ['number', 'string', 'boolean']) === false) {
+            if (in_array($property->type, ['number', 'string', 'boolean', 'any[]']) === false) {
                 $rel = str_replace('[]', '', $property->type);
                 $imports[] = 'import { ' . $rel . ' } from "./' . $rel . '";';
             }
@@ -43,7 +43,7 @@ class TypeScriptBaseInterface
         }
 
         $result = "";
-        $result .= implode("\n", $imports);
+        $result .= implode("\n", array_unique($imports));
         $result .= "\nexport interface {$this->name} {\n";
         $result .= implode("\n", $pieces);
         $result .= "\n}\n";

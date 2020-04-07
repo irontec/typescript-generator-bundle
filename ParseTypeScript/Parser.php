@@ -179,6 +179,8 @@ class Parser
             $result = 'string';
         } elseif (in_array($type, ['boolean', 'bool'])) {
             $result = 'boolean';
+        } elseif (in_array($type, ['json', 'array'])) {
+            $result = 'any[]';
         }
 
         return $result;
