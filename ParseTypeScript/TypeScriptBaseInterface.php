@@ -34,9 +34,12 @@ class TypeScriptBaseInterface
         $imports = [];
         $pieces = [];
         foreach ($this->properties as $property) {
+
             if (in_array($property->type, ['number', 'string', 'boolean', 'any[]']) === false) {
                 $rel = str_replace('[]', '', $property->type);
-                $imports[] = 'import { ' . $rel . ' } from "./' . $rel . '";';
+                if ($this->name !== $rel) {
+                    $imports[] = 'import { ' . $rel . ' } from "./' . $rel . '";';
+                }
             }
 
             $pieces[] = "  " . $property->name . ": " . $property->type . ";";
