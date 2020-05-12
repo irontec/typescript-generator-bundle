@@ -225,14 +225,19 @@ class Parser
         $matches = [];
 
         $regex = array(
-            '/targetEntity="([a-zA-Z]+)"/i' => '',
-            '/targetEntity="([a-zA-Z]+)\\\\([a-zA-Z]+)\\\\([a-zA-Z]+)"/i' => '',
-            '/targetEntity="([a-zA-Z]+)"/i' => '[]',
+            '/targetEntity="([a-zA-Z]+)"/i',
+            '/targetEntity="([a-zA-Z]+)\\\\([a-zA-Z]+)\\\\([a-zA-Z]+)"/i',
         );
 
-        foreach ($regex as $reg => $val) {
+        foreach ($regex as $reg) {
             if (preg_match($reg, $type, $matches)) {
-                $result = end($matches) . $val;
+
+                $collection = '[]';
+                if (strpos($type, 'OneToOne') !== false) {
+                    $collection = '';
+                }
+
+                $result = end($matches) . $collection;
                 break;
             }
         }
