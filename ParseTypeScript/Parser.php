@@ -151,7 +151,7 @@ class Parser
         if ($result === 'unknown') {
             if (preg_match('/type="([a-zA-Z]+)"/i', $docComment, $matches)) {
                 $result = $this->getTypescriptProperty($matches[1]);
-            } elseif (preg_match('/targetEntity="([a-zA-Z-\\\\]+)"/i', $docComment, $matches)) {
+            } elseif (preg_match('/targetEntity=("[a-zA-Z-\\\\]+")|([a-zA-Z]+::class)/i', $docComment, $matches)) {
                 $result = $this->getRelationCollectionProperty($docComment);
             }
         }
@@ -226,6 +226,7 @@ class Parser
 
         $regex = array(
             '/targetEntity="([a-zA-Z]+)"/i',
+            '/targetEntity=([a-zA-Z]+)::class/i',
             '/targetEntity="([a-zA-Z]+)\\\\([a-zA-Z]+)\\\\([a-zA-Z]+)"/i',
         );
 
@@ -233,7 +234,7 @@ class Parser
             if (preg_match($reg, $type, $matches)) {
 
                 $collection = '[]';
-                if (strpos($type, 'OneToOne') !== false) {
+                if (strpos($type, 'OneToOne') !== false || strpos($type, 'ManyToOne') !== false) {
                     $collection = '';
                 }
 
