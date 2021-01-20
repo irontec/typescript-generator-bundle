@@ -33,6 +33,9 @@ class Parser
     public function __construct(string $filePath)
     {
 
+        if(!class_exists($this->getClassFromFile($filePath))) {
+            return;
+        }
         $reflectionClass = new \ReflectionClass($this->getClassFromFile($filePath));
 
         $this->currentInterface = new TypeScriptBaseInterface($reflectionClass->getShortName());
