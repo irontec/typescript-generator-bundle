@@ -260,44 +260,41 @@ class Parser
     private function getClassFromFile(string $file): string
     {
 
-        $fp = fopen($file, 'r');
-        $class = $namespace = $buffer = '';
+        $tokens = token_get_all(file_get_contents($file));
+        $count = count($tokens);
+
+        $namespace = '';
         $i = 0;
-        while (!$class) {
-            if (feof($fp)) {
+
+        while ($i < $count) {
+            $token = $tokens[$i];
+            if (is_array($token) && $token[0] === T_NAMESPACE) {
+                // Found namespace declaration
+                while (++$i < $count) {
+                    if ($tokens[$i] === ';') {
+                        $namespace = trim($namespace);
+                        break;
+                    }
+                    $namespace .= is_array($tokens[$i]) ? $tokens[$i][1] : $tokens[$i];
+                }
                 break;
             }
+            $i++;
+        }
 
-            $buffer .= fread($fp, filesize($file));
-            $tokens = token_get_all($buffer);
-
-            if (strpos($buffer, '{') === false) {
-                continue;
-            }
-
-            for (;$i<count($tokens);$i++) {
-                if ($tokens[$i][0] === T_NAMESPACE) {
-                    for ($j=$i+1;$j<count($tokens); $j++) {
-                        if ($tokens[$j][0] === T_STRING) {
-                            $namespace .= '\\'.$tokens[$j][1];
-                        } else if ($tokens[$j] === '{' || $tokens[$j] === ';') {
-                            break;
-                        }
-                    }
-                }
-
-                if ($tokens[$i][0] === T_CLASS) {
-                    for ($j=$i+1;$j<count($tokens);$j++) {
-                        if ($tokens[$j] === '{') {
-                            $class = $tokens[$i+2][1];
-                        }
-                    }
-                }
+        $classes = [];
+        for ($i = 2; $i < $count; $i++) {
+            if ($tokens[$i - 2][0] == T_CLASS
+            && $tokens[$i - 1][0] == T_WHITESPACE
+            && $tokens[$i][0] == T_STRING
+            ) {
+                $class_name = $tokens[$i][1];
+                $classes[] = $class_name;
             }
         }
 
-        return $namespace . '\\' . $class;
+        $className = current($classes);
 
+        return $namespace . '\\' . $className;
     }
-
 }
