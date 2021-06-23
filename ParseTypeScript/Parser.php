@@ -33,16 +33,33 @@ class Parser
     public function __construct(string $filePath)
     {
 
-        if(!class_exists($this->getClassFromFile($filePath))) {
+        if (!class_exists($this->getClassFromFile($filePath))) {
             return;
         }
+
+        $source = file_get_contents($filePath);
+
+        $tokens = token_get_all($source);
+        $comment = [T_COMMENT, T_DOC_COMMENT];
+        $comment = [388, 389];
+
+        $invalid = true;
+        foreach ($tokens as $token) {
+            if (is_array($token) && in_array((int) $token[0], $comment)) {
+                if (strpos($token[1], 'JsonFormly') !== false) {
+                    $invalid = false;
+                    break;
+                }
+            }
+        }
+
+        if ($invalid === true) {
+            return;
+        }
+
         $reflectionClass = new \ReflectionClass($this->getClassFromFile($filePath));
 
         $this->currentInterface = new TypeScriptBaseInterface($reflectionClass->getShortName());
-
-        if (strpos($reflectionClass->getDocComment(), '#TypeScriptMe') === false) {
-            return;
-        }
 
         $this->properties = $reflectionClass->getProperties();
         if (empty($this->properties)) {
@@ -109,7 +126,7 @@ class Parser
             $result = end($expl);
 
             if ($result === 'Collection') {
-                $result = $this->getRelationCollectionProperty($property->getDocComment());
+                $result = $this->getRelationCollectionProperty($property);
             }
 
         } else {
@@ -117,7 +134,6 @@ class Parser
         }
 
         return $result;
-
     }
 
     /**
@@ -147,7 +163,7 @@ class Parser
                 $t = trim(strtolower($matches[1]));
                 $result = $this->getTypescriptProperty($t);
             } else {
-                $result = $this->getRelationProperty($docComment);
+                $result = $this->getRelationProperty($property);
             }
         }
 
@@ -155,10 +171,13 @@ class Parser
             if (preg_match('/type="([a-zA-Z]+)"/i', $docComment, $matches)) {
                 $result = $this->getTypescriptProperty($matches[1]);
             } elseif (preg_match('/targetEntity=("[a-zA-Z-\\\\]+")|([a-zA-Z]+::class)/i', $docComment, $matches)) {
-                $result = $this->getRelationCollectionProperty($docComment);
+                $result = $this->getRelationCollectionProperty($property);
             }
         }
 
+        var_dump($property);
+        var_dump($result);
+        die;
         return $result;
 
     }
@@ -178,7 +197,7 @@ class Parser
 
         if (in_array($type, ['int', 'integer', 'smallint', 'bigint', 'decimal', 'float'], true)) {
             $result = 'number';
-        } elseif (in_array($type, ['string', 'text', 'guid', 'date', 'time', 'datetime', 'datetimetz'])) {
+        } elseif (in_array($type, ['string', 'text', 'guid', 'date', 'time', 'datetime', 'datetimetz', 'datetimeinterface'])) {
             $result = 'string';
         } elseif (in_array($type, ['boolean', 'bool'])) {
             $result = 'boolean';
@@ -196,8 +215,10 @@ class Parser
      * @param string $type
      * @return string
      */
-    private function getRelationProperty(string $type): string
+    private function getRelationProperty($type): string
     {
+
+        var_dump($type);die('getRelationProperty');
 
         $result = self::PARAM_UNKNOWN;
         $matches = [];
@@ -220,8 +241,35 @@ class Parser
      * @param string $type
      * @return string
      */
-    private function getRelationCollectionProperty(string $type): string
+    private function getRelationCollectionProperty($type): string
     {
+
+        $classRelations = [
+            'Doctrine\ORM\Mapping\ManyToMany',
+            'Doctrine\ORM\Mapping\OneToMany',
+            'Doctrine\ORM\Mapping\ManyToOne'
+        ];
+
+        if (method_exists($type, 'getAttributes') && empty($type->getAttributes()) === false) {
+            $entity = '';
+            $collection = '[]';
+            /** @var \ReflectionProperty $type */
+            foreach ($type->getAttributes() as $att) {
+                if (strpos($att->getName(), 'OneToOne') !== false || strpos($type, 'ManyToOne') !== false) {
+                    $collection = '';
+                }
+
+                if (in_array($att->getName(), $classRelations)) {
+                    $expl = explode('\\', $att->getArguments()['targetEntity']);
+                    $entity = end($expl);
+                }
+            }
+            return $entity . $collection;
+            // var_dump($result);die;
+
+        }
+
+        $type = $type->getDocComment();
 
         $result = self::PARAM_UNKNOWN;
 
