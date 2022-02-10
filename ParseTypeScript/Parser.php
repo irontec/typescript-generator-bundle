@@ -40,20 +40,20 @@ class Parser
         $source = file_get_contents($filePath);
 
         $tokens = token_get_all($source);
+        // https://www.php.net/manual/es/tokens.php
         $comment = [T_COMMENT, T_DOC_COMMENT];
-        $comment = [388, 389];
 
-        $invalid = true;
+        $invalid = false;
         foreach ($tokens as $token) {
             if (is_array($token) && in_array((int) $token[0], $comment)) {
-                if (strpos($token[1], 'JsonFormly') !== false) {
-                    $invalid = false;
+                if (strpos($token[1], 'TypeScriptMe') !== false) {
+                    $invalid = true;
                     break;
                 }
             }
         }
 
-        if ($invalid === true) {
+        if ($invalid === false) {
             return;
         }
 
@@ -85,7 +85,6 @@ class Parser
             }
 
             $this->currentInterface->properties[] = new TypeScriptProperty($property->getName() . $isNull, $type);
-
         }
 
         $this->output[] = $this->currentInterface;
@@ -128,9 +127,12 @@ class Parser
             if ($result === 'Collection') {
                 $result = $this->getRelationCollectionProperty($property);
             }
-
         } else {
             $result = $this->getTypescriptProperty($name);
+        }
+
+        if (preg_match('/uuid(.*)/i', $result, $matches)) {
+            $result = 'string';
         }
 
         return $result;
