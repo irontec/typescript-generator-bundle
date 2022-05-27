@@ -268,9 +268,12 @@ class Parser
                     $entity = end($expl);
                 }
             }
-            return $entity . $collection;
-            // var_dump($result);die;
 
+            // Attributes and annotations may be mixed. If the entity could not be find this way,
+            // check if it's still assigned through annotations
+            if (isset($entity)) {
+                return $entity . $collection;
+            }
         }
 
         $type = $type->getDocComment();
