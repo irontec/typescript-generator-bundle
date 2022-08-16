@@ -271,7 +271,7 @@ class Parser
 
             // Attributes and annotations may be mixed. If the entity could not be find this way,
             // check if it's still assigned through annotations
-            if (isset($entity)) {
+            if (!empty($entity)) {
                 return $entity . $collection;
             }
         }
