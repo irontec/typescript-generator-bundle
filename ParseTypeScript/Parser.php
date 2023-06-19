@@ -197,7 +197,7 @@ class Parser
 
         $result = self::PARAM_UNKNOWN;
 
-        if (in_array($type, ['int', 'integer', 'smallint', 'bigint', 'decimal', 'float', 'datetime', 'datetimetz', 'datetimeinterface'], true)) {
+        if (in_array($type, ['int', 'integer', 'smallint', 'bigint', 'decimal', 'float', 'datetime', 'datetimetz', 'datetimeinterface', 'datetimeimmutable'], true)) {
             $result = 'number';
         } elseif (in_array($type, ['string', 'text', 'guid', 'date', 'time'], true)) {
             $result = 'string';
