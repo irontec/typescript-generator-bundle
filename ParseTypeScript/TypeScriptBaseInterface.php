@@ -42,7 +42,7 @@ class TypeScriptBaseInterface
                 }
             }
 
-            $pieces[] = "  " . $property->name . ": " . $property->type . ";";
+            $pieces[] = '  ' . (string) $property  . ';';
         }
 
         $result = "";
