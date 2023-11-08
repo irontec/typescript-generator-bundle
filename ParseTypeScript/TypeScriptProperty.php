@@ -23,15 +23,21 @@ class TypeScriptProperty
      */
     public $type;
 
-    public function __construct(string $name, string $type = 'unknown')
+    /**
+     * @var bool
+     */
+    public $isNullable;
+
+    public function __construct(string $name, string $type = 'unknown', bool $isNullable = false)
     {
         $this->name = $name;
         $this->type = $type;
+        $this->isNullable = $isNullable;
     }
 
     public function __toString()
     {
-        return $this->name . ': ' . $this->type;
+        return $this->name . '?: ' . $this->type . ($this->isNullable ? ' | null' : '') ;
     }
 
 }

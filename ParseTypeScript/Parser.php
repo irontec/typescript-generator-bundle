@@ -75,16 +75,16 @@ class Parser
 
             $type = $this->parsePhpDocForProperty($property);
 
-            $isNull = '';
+            $isNull = false;
             if (preg_match('/nullable=true/i', $property->getDocComment(), $matches)) {
-                $isNull = '?';
+                $isNull = true;
             }
 
             if (empty($isNull) && is_null($property->getType()) !== true && $property->getType()->allowsNull()) {
-                $isNull = '?';
+                $isNull = true;
             }
 
-            $this->currentInterface->properties[] = new TypeScriptProperty($property->getName() . $isNull, $type);
+            $this->currentInterface->properties[] = new TypeScriptProperty($property->getName(), $type, $isNull);
         }
 
         $this->output[] = $this->currentInterface;
