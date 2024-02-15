@@ -44,7 +44,7 @@ class GenerateAllCommand extends Command
 
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
 
         $commandInterface = $this->getApplication()->find('typescript:generate:interfaces');
