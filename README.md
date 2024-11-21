@@ -8,7 +8,7 @@ Este bundle genera complementeos para usar en TypeScript, basados en un proyecto
 composer require irontec/typescript-generator-bundle
 ````
 
-> PHP *>=7.4*
+> PHP *>=8.0*
 
 # Commands
 
@@ -44,7 +44,7 @@ Este comando acepta 2 parametros, los cuales uno es obligatorio y otro opcional.
 **output-dir** [*Obligatorio*]: Directorio donde se crearan las interfaces
 **entities-dir** [*Opcional*]: Directorio de las entidades que se usaran para generar las interfaces. Por defecto se busca en "**src/Entity/**"
 
-Para volver una entidad en una interface, es necesario escribir el comentario "**#TypeScriptMe**" en la definición de la clase, Ejemplo:
+Para volver una entidad en una interface, es necesario escribir el comentario "**#TypeScriptMe**" o  atributo `#[TypeScriptMe]` en la definición de la clase, Ejemplo:
 
 ````php
 <?php
@@ -56,6 +56,20 @@ namespace App\Entity;
  * #TypeScriptMe
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
+class User
+{
+
+...
+````
+
+````php
+<?php
+namespace App\Entity;
+
+...
+
+#[TypeScriptMe]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 class User
 {
 

@@ -5,10 +5,10 @@
 
 namespace Irontec\TypeScriptGeneratorBundle\Command;
 
-use \Symfony\Component\Console\Command\Command;
-use \Symfony\Component\Console\Input\{ArrayInput, InputArgument, InputInterface};
-use \Symfony\Component\Console\Output\OutputInterface;
-use \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\{ArrayInput, InputArgument, InputInterface};
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
  * @author Irontec <info@irontec.com>
@@ -17,60 +17,63 @@ use \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
  */
 class GenerateAllCommand extends Command
 {
-
-    protected static $defaultName = 'typescript:generate:all';
-
-    /**
-     * @var ParameterBagInterface
-     */
-    private ParameterBagInterface $params;
-
-    public function __construct(ParameterBagInterface $params)
+    public function __construct(private ParameterBagInterface $params)
     {
-        $this->params = $params;
-        parent::__construct(self::$defaultName);
+        parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
+        /** @var string @projectDir */
+        $projectDir = $this->params->get('kernel.project_dir');
 
+        $this->setName('typescript:generate:all');
         $this->setDescription('Execute all commands');
         $this->setHelp('bin/console typescript:generate:all interfaces src/Entity');
 
         $this->addArgument('output', InputArgument::REQUIRED, 'Where to generate the interfaces?');
-        $this->addArgument('entities-dir', InputArgument::OPTIONAL, 'Where are the entities?', $this->params->get('kernel.project_dir') . '/src/Entity/');
-        $this->addArgument('package-name', InputArgument::OPTIONAL, 'what is the name of the package?');
-        $this->addArgument('version', InputArgument::OPTIONAL, 'manual version?');
-
+        $this->addArgument('entities-dir', InputArgument::OPTIONAL, 'Where are the entities?', "{$projectDir}/src/Entity/");
+        $this->addArgument('package-name', InputArgument::OPTIONAL, 'What is the name of the package?');
+        $this->addArgument('version', InputArgument::OPTIONAL, 'Manual version?');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $commandInterface = $this->getApplication()?->find('typescript:generate:interfaces');
+        $commandPackage   = $this->getApplication()?->find('typescript:generate:package');
 
-        $commandInterface = $this->getApplication()->find('typescript:generate:interfaces');
-        $commandPackage   = $this->getApplication()->find('typescript:generate:package');
+        if (null === $commandInterface || null === $commandPackage) {
+            return Command::FAILURE;
+        }
 
         $dirOutput = $input->getArgument('output');
         $dirEntity = $input->getArgument('entities-dir');
         $packageName = $input->getArgument('package-name');
         $version     = $input->getArgument('version');
 
-        $argumentsInterface = array(
+        $argumentsInterface = [
             'output' => $dirOutput,
             'entities-dir' => $dirEntity
-        );
+        ];
 
-        $argumentsPackage = array(
+        $argumentsPackage = [
             'output' => $dirOutput,
             'package-name' => $packageName,
             'version' => $version
-        );
+        ];
 
-        $commandInterface->run(new ArrayInput($argumentsInterface), $output);
-        $commandPackage->run(new ArrayInput($argumentsPackage), $output);
+        $status = $commandPackage->run(new ArrayInput($argumentsPackage), $output);
 
-        return 0;
+        if (Command::SUCCESS !== $status) {
+            return Command::INVALID;
+        }
 
+        $status = $commandInterface->run(new ArrayInput($argumentsInterface), $output);
+
+        if (Command::SUCCESS !== $status) {
+            return Command::INVALID;
+        }
+
+        return Command::SUCCESS;
     }
-
 }

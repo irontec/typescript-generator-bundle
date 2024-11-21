@@ -5,12 +5,14 @@
 
 namespace Irontec\TypeScriptGeneratorBundle\Command;
 
-use \PHLAK\SemVer\Version as Versions;
-use \Symfony\Component\Console\Command\Command;
-use \Symfony\Component\Console\Input\{InputArgument, InputInterface};
-use \Symfony\Component\Console\Output\OutputInterface;
-use \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use \Symfony\Component\Filesystem\Filesystem;
+use Irontec\TypeScriptGeneratorBundle\Package\Package;
+use PHLAK\SemVer\Version as Versions;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\{InputArgument, InputInterface};
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+
 
 /**
  * @author Irontec <info@irontec.com>
@@ -19,96 +21,87 @@ use \Symfony\Component\Filesystem\Filesystem;
  */
 class GeneratePackageCommand extends Command
 {
+    private string $projectDir;
 
-    const PACKAGE_FILE = 'package.json';
-
-    protected static $defaultName = 'typescript:generate:package';
-
-    /**
-     * @var ParameterBagInterface
-     */
-    private ParameterBagInterface $params;
-
-    public function __construct(ParameterBagInterface $params)
+    public function __construct(private ParameterBagInterface $params)
     {
-        $this->params = $params;
-        parent::__construct(self::$defaultName);
+        /** @var string $projectDir */
+        $this->projectDir = $this->params->get('kernel.project_dir');
+
+        parent::__construct();
     }
 
     protected function configure()
     {
-
+        $this->setName('typescript:generate:package');
         $this->setDescription('Generate or update package.json');
 
         $this->addArgument('output', InputArgument::REQUIRED, 'Where to generate the interfaces?');
-        $this->addArgument('package-name', InputArgument::OPTIONAL, 'what is the name of the package?');
-        $this->addArgument('version', InputArgument::OPTIONAL, 'manual version?');
-
+        $this->addArgument('package-name', InputArgument::OPTIONAL, 'What is the name of the package?', 'default');
+        $this->addArgument('version', InputArgument::OPTIONAL, 'Manual version?', 'current');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /** @var string $dirOutput */
+        $dirOutput = $input->getArgument('output');
 
-        $dirOutput   = $input->getArgument('output');
+        /** @var string $packageName */
         $packageName = $input->getArgument('package-name');
-        $version     = $input->getArgument('version');
 
-        $packageFile = $dirOutput . '/' . self::PACKAGE_FILE;
+        /** @var string $version */
+        $version = $input->getArgument('version');
 
-        $fs = new Filesystem();
+        $packageFilename = "{$this->projectDir}/{$dirOutput}/" . Package::PACKAGE_FILENAME;
 
-        if (file_exists($packageFile) === false) {
-            if (is_null($packageName)) {
-                throw new \ErrorException('package-name is required to new package.json');
+        if (false === file_exists($packageFilename)) {
+
+            if ('default' === $packageName) {
+                $output->writeln('Argument `package-name` is required for new packages and it can not be `default`.');
+
+                return Command::INVALID;
             }
 
-            $fs->dumpFile($packageFile, json_encode($this->getDefaultPackage($packageName)), JSON_UNESCAPED_SLASHES);
-            $output->writeln('Created ' . $packageFile);
+            $this->writePackageToFile($packageFilename, new Package($packageName));
+            $output->writeln(sprintf('Created %s', $packageFilename));
 
         } else {
+            $package = Package::createFromJson($packageFilename);
 
-            $content = file_get_contents($packageFile);
-            $content = json_decode($content, true);
-            if (json_last_error() !== 0) {
-                throw new \ErrorException(json_last_error_msg());
+            if ('default' !== $packageName) {
+                $package->setName($packageName);
             }
 
-            $currentVersion = new Versions((isset($content['version']) ? $content['version'] : '0.0.1'));
+            $nextVersion = $this->getPackageNextVersion($package, $version);
+            $package->setVersion($nextVersion);
 
-            if (in_array($version, array('major', 'minor', 'patch'))) {
-                $incre = 'increment' . ucwords(strtolower($version));
-                $currentVersion->$incre();
-            } elseif (is_null($version) === true) {
-                $currentVersion->incrementPatch();
-            } else {
-                $currentVersion->setVersion($version);
-            }
-
-            $content['version'] = $currentVersion->__toString();
-            if (is_null($packageName) === false) {
-                $content['name'] = $packageName;
-            }
-
-            $fs->dumpFile($packageFile, json_encode($content, JSON_UNESCAPED_SLASHES));
-            $output->writeln('Updated ' . $packageFile);
-
+            $this->writePackageToFile($packageFilename, $package);
+            $output->writeln(sprintf('Updated %s', $packageFilename));
         }
 
-        return 0;
-
+        return Command::SUCCESS;
     }
 
-    private function getDefaultPackage(string $packageName)
+    private function getPackageNextVersion(Package $package, string $inputVersion): string
     {
-        return array(
-            'name' => $packageName,
-            'version' => '0.0.1',
-            'description' => 'typescript interfaces for ' . $packageName . ' project',
-            'types' => 'models.d.ts',
-            'keywords' => [],
-            'author' => '',
-            'license' => 'EUPL'
-        );
+        $currentVersion = new Versions($package->getVersion() ?? Package::DEFAULT_VERSION);
+
+        if ('current' === $inputVersion) {
+            $currentVersion->incrementPatch();
+        } elseif (in_array($inputVersion, ['major', 'minor', 'patch'])) {
+            $incrementMethod = 'increment' . ucwords(strtolower($inputVersion));
+            $currentVersion->$incrementMethod();
+        } else {
+            $currentVersion->setVersion($inputVersion);
+        }
+
+        return (string) $currentVersion;
     }
 
+    private function writePackageToFile(string $filename, Package $package): void
+    {
+        $fs = new Filesystem();
+
+        $fs->dumpFile($filename, (string) $package);
+    }
 }
