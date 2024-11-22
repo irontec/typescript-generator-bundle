@@ -20,10 +20,13 @@
         }
     ],
     "require" : {
-        "php": "^7.4|^8",
-        "symfony/console": "^5.0.2|^6|^7",
-        "symfony/filesystem": "^5.0.2|^6|^7",
-        "symfony/finder": "^5.0.2|^6|^7",
-        "phlak/semver": "^3.0.1"
+        "php": "^8",
+        "symfony/console": "^6.4",
+        "symfony/filesystem": "^6.4|^7",
+        "symfony/finder": "^6|^7",
+        "phlak/semver": "^3.0.1",
+        "symfony/dependency-injection": "^6.4",
+        "symfony/config": "^6.4",
+        "symfony/http-kernel": "^6.4"
     }
 }

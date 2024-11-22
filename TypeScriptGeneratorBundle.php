@@ -1,12 +1,13 @@
 <?php
+
 /**
  * This file is part of the TypeScriptGeneratorBundle.
  */
 
 namespace Irontec\TypeScriptGeneratorBundle;
 
-use \Symfony\Component\DependencyInjection\ContainerBuilder;
-use \Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
  * @author Irontec <info@irontec.com>
@@ -15,10 +16,8 @@ use \Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class TypeScriptGeneratorBundle extends Bundle
 {
-
     public function build(ContainerBuilder $container)
     {
         parent::build($container);
     }
-
 }

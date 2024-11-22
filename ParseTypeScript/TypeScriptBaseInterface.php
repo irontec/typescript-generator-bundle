@@ -12,31 +12,33 @@ namespace Irontec\TypeScriptGeneratorBundle\ParseTypeScript;
  */
 class TypeScriptBaseInterface
 {
-
-    /**
-     * @var string
-     */
-    public $name;
+    public string $name;
 
     /**
      * @var TypeScriptProperty[]
      */
-    public $properties = [];
+    public array $properties = [];
 
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->name = $name;
     }
 
     public function __toString()
     {
-
         $imports = [];
         $pieces = [];
+
         foreach ($this->properties as $property) {
 
             if (in_array($property->type, ['number', 'string', 'boolean', 'any[]']) === false) {
+
+                if (Parser::PARAM_UNKNOWN === $property->type) {
+                    continue;
+                }
+
                 $rel = str_replace('[]', '', $property->type);
+
                 if ($this->name !== $rel) {
                     $imports[] = 'import { ' . $rel . ' } from "./' . $rel . '";';
                 }
@@ -53,5 +55,4 @@ class TypeScriptBaseInterface
 
         return $result;
     }
-
 }

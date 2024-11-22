@@ -12,21 +12,11 @@ namespace Irontec\TypeScriptGeneratorBundle\ParseTypeScript;
  */
 class TypeScriptProperty
 {
+    public string $name;
 
-    /**
-     * @var string
-     */
-    public $name;
+    public string $type;
 
-    /**
-     * @var string
-     */
-    public $type;
-
-    /**
-     * @var bool
-     */
-    public $isNullable;
+    public bool $isNullable;
 
     public function __construct(string $name, string $type = 'unknown', bool $isNullable = false)
     {
@@ -35,9 +25,8 @@ class TypeScriptProperty
         $this->isNullable = $isNullable;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
-        return $this->name . '?: ' . $this->type . ($this->isNullable ? ' | null' : '') ;
+        return $this->name . '?: ' . $this->type . ($this->isNullable ? ' | null' : '');
     }
-
 }
