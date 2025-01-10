@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of the TypeScriptGeneratorBundle.
  */
@@ -70,13 +71,13 @@ class GenerateInterfaceCommand extends Command
             return Command::SUCCESS;
         }
 
-        $content = array_reduce($models, fn ($content, $model) => sprintf("%sexport * from './%s';%s", $content, $model, PHP_EOL));
+        $content = array_reduce($models, fn($content, $model) => sprintf("%sexport * from './%s';%s", $content, $model, PHP_EOL));
 
         if (!is_string($content)) {
             return Command::SUCCESS;
         }
 
-        $targetFile = $dirOutput . '/models.d.ts';
+        $targetFile = "{$this->projectDir}/{$dirOutput}/models.d.ts";
         $this->writeToFile($targetFile, $content);
         $output->writeln(sprintf('Created %s', $targetFile));
 
