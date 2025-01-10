@@ -62,7 +62,7 @@ class GeneratePackageCommand extends Command
                 return Command::INVALID;
             }
 
-            $this->writePackageToFile($packageFilename, new Package($packageName));
+            $this->writePackageToFile($packageFilename, new Package($packageName, $version));
             $output->writeln(sprintf('Created %s', $packageFilename));
 
         } else {
