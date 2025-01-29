@@ -1,0 +1,6 @@
+# Folders to ignore
+.idea
+vendor
+
+# Files to ignore
+composer.lock
