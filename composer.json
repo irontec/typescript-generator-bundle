@@ -7,7 +7,7 @@
     "type": "symfony-bundle",
     "autoload": {
         "psr-4": {
-            "Irontec\\TypeScriptGeneratorBundle\\": "" 
+            "Irontec\\TypeScriptGeneratorBundle\\": ""
         }
     },
     "authors" : [{
@@ -21,12 +21,12 @@
     ],
     "require" : {
         "php": "^8",
-        "symfony/console": "^6.4",
+        "symfony/console": "^6.4|^7",
         "symfony/filesystem": "^6.4|^7",
         "symfony/finder": "^6|^7",
         "phlak/semver": "^3.0.1",
-        "symfony/dependency-injection": "^6.4",
-        "symfony/config": "^6.4",
-        "symfony/http-kernel": "^6.4"
+        "symfony/dependency-injection": "^6.4|^7",
+        "symfony/config": "^6.4|^7",
+        "symfony/http-kernel": "^6.4|^7"
     }
 }
